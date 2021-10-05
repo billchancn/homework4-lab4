@@ -1,0 +1,85 @@
+---
+title: "hw4lab4"
+author: "Chan, Kim Fai"
+date: "9/30/2021"
+output:
+html_document: default
+---
+  
+  
+```{r setup, include=FALSE, echo = FALSE}
+setwd("~/Desktop/jeff's documents/Master of Economics in CCNY/ECONOMETRICS ECO B2000/homework 4 lab 4")
+load("acs2017_ny_data.RData")
+attach(acs2017_ny)
+use_varb <- (AGE >= 25) & (AGE <= 65) & (LABFORCE == 2) & (WKSWORK2 > 4) & (UHRSWORK >= 35)
+dat_use <- subset(acs2017_ny,use_varb) # 
+detach()
+attach(dat_use)
+```
+
+
+```{r, echo=FALSE}
+model_temp1 <- lm(INCWAGE ~ AGE + female + AfAm + Asian + Amindian + race_oth + Hispanic + educ_hs + educ_somecoll + educ_college + educ_advdeg)
+summary(model_temp1)
+plot(model_temp1)
+# maybe get fancy
+require(stargazer)
+stargazer(model_temp1, type = "text")
+# play with stargazer instead of summary, it can look nicer!
+```
+
+According to 'Estimate Column' we can see income wage increase while higher education received. and the p-value is < 2.2e-16, which is significant small.
+
+```{r echo=FALSE}
+require(AER)
+```
+
+
+```{r echo=FALSE}
+# subset in order to plot...
+NNobs <- length(INCWAGE)
+set.seed(12345) # just so you can replicate and get same "random" choices
+graph_obs <- (runif(NNobs) < 0.1) # so something like just 1/10 as many obs
+dat_graph <-subset(dat_use,graph_obs)
+
+plot(INCWAGE ~ jitter(AGE, factor = 2), pch = 16, col = rgb(0.5, 0.5, 0.5, alpha = 0.2), data = dat_graph)
+# ^^ that looks like crap since Wages are soooooooo skew!  So try to find some sensible ylim = c(0, ??)
+
+plot(INCWAGE ~ jitter(AGE, factor = 2), pch = 16, col = rgb(0.5, 0.5, 0.5, alpha = 0.2), ylim = c(0,150000), data = dat_graph)
+# discus what you see in this plot
+
+# change this line to fit your regression
+to_be_predicted2 <- data.frame(AGE = 25:65, female = 1, AfAm = 0, Asian = 0, Amindian = 1, race_oth = 1, Hispanic = 1, educ_hs = 0, educ_somecoll = 0, educ_college = 1, educ_advdeg = 0)
+to_be_predicted2$yhat <- predict(model_temp1, newdata = to_be_predicted2)
+lines(yhat ~ AGE, data = to_be_predicted2)
+```
+
+
+now let's see what's the different between male and female:
+```{r echo=FALSE}
+# subset in order to plot...
+NNobs <- length(INCWAGE)
+set.seed(12345) # just so you can replicate and get same "random" choices
+graph_obs <- (runif(NNobs) < 0.1) # so something like just 1/10 as many obs
+dat_graph <-subset(dat_use,graph_obs)
+
+plot(INCWAGE ~ jitter(AGE, factor = 2), pch = 16, col = rgb(0.5, 0.5, 0.5, alpha = 0.2), data = dat_graph)
+# ^^ that looks like crap since Wages are soooooooo skew!  So try to find some sensible ylim = c(0, ??)
+
+plot(INCWAGE ~ jitter(AGE, factor = 2), pch = 16, col = rgb(0.5, 0.5, 0.5, alpha = 0.2), ylim = c(0,150000), data = dat_graph)
+# discus what you see in this plot
+
+# change this line to fit your regression
+to_be_predicted2 <- data.frame(AGE = 25:65, female = 0, AfAm = 0, Asian = 0, Amindian = 1, race_oth = 1, Hispanic = 1, educ_hs = 0, educ_somecoll = 0, educ_college = 1, educ_advdeg = 0)
+to_be_predicted2$yhat <- predict(model_temp1, newdata = to_be_predicted2)
+lines(yhat ~ AGE, data = to_be_predicted2)
+```
+
+
+```{r eval = FALSE}
+detach()
+```
+
+we can see a man who has a college educational level, his income interval at the 95% confidence level.
+
+The conclusion in my opinion. Age, gender and education background are all factors that significantly affecting income, The average income of males is much greater than that of females.in high-income groups, the number of males is even greater than females. For education degrees that individual gets, higher education background will get the higher income, and the income of people with a graduate degree or higher are much higher than that of people with a high school education.
